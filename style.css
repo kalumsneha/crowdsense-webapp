@@ -1,0 +1,26 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+}
+
+.status-box {
+    margin-top: 20px;
+    padding: 20px;
+    font-size: 1.5rem;
+    border-radius: 10px;
+    background: #ccc;
+    color: #fff;
+    display: inline-block;
+    min-width: 200px;
+}
