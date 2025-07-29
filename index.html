@@ -1,20 +1,57 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>CrowdSense - Indoor Congestion Detection</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>CrowdSense V2</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2em; background: #f0f0f0; }
+    h1 { color: #333; }
+    #status { font-size: 1.5em; margin-top: 1em; padding: 1em; border-radius: 10px; }
+    .low { background-color: #d4edda; color: #155724; }
+    .medium { background-color: #fff3cd; color: #856404; }
+    .high { background-color: #f8d7da; color: #721c24; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏃 CrowdSense</h1>
-        <p>Real-Time Indoor Congestion Detection</p>
-        <div class="status-box" id="congestion-status">Detecting...</div>
-        <p>Step Count: <span id="step-count">0</span></p>
-        <p>Nearby Devices (Bluetooth): <span id="bt-devices">N/A</span></p>
-    </div>
-    <script src="script.js"></script>
+  <h1>📶 CrowdSense</h1>
+  <p>Detecting indoor congestion...</p>
+  <div id="status" class="low">Congestion: Low</div>
+  <script>
+    let samples = [], lastUpdate = Date.now();
+
+    if ('Accelerometer' in window) {
+      const accel = new Accelerometer({ frequency: 10 });
+      accel.addEventListener('reading', () => {
+        const mag = Math.sqrt(accel.x**2 + accel.y**2 + accel.z**2);
+        samples.push(mag);
+        if (samples.length > 30) samples.shift();
+        updateCongestion();
+      });
+      accel.start();
+    }
+
+    async function updateCongestion() {
+      const mean = samples.reduce((a, b) => a + b, 0) / samples.length;
+      const variance = samples.reduce((a, b) => a + (b - mean) ** 2, 0) / samples.length;
+      const devices = await detectBluetooth();
+      let level = 'low';
+
+      if (devices >= 4 || variance > 4.5) level = 'high';
+      else if (devices >= 2 || variance > 2.5) level = 'medium';
+
+      const el = document.getElementById("status");
+      el.textContent = "Congestion: " + level.charAt(0).toUpperCase() + level.slice(1);
+      el.className = level;
+    }
+
+    async function detectBluetooth() {
+      try {
+        const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+        return 1;
+      } catch {
+        return 0;
+      }
+    }
+  </script>
 </body>
 </html>
